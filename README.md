@@ -32,7 +32,26 @@ The isDone function checks at the end of each round whether or not all the nodes
 
 # How to run
 
+After cloning the repository, simply cd to the file and type "go run main.go". This will begin the program. Make sure you have Go installed!
+
+![Screen Shot 2021-10-12 at 11 09 46 PM](https://user-images.githubusercontent.com/70530925/137061203-abc91fb8-37cd-404a-899b-43513ab3ff21.png)
+
+When the program starts running, it will ask for three different things. Be sure to only input numbers, or there will be an error.
+
+![Screen Shot 2021-10-12 at 11 09 46 PM](https://user-images.githubusercontent.com/70530925/137061361-00ac5bcb-4562-4b1e-b6d4-b65a0d561912.png)
+
+After this input, it will begin the gossip simulation.
+
 # Sample output
+
+Below are screenshots of an output of using 5 nodes, 10 turns, and push/pull type gossip (number 3 in input).
+
+![Screen Shot 2021-10-12 at 11 21 07 PM](https://user-images.githubusercontent.com/70530925/137061593-630de636-908b-448b-bb1e-26ec8c9a5a16.png)
+
+![Screen Shot 2021-10-12 at 11 21 51 PM](https://user-images.githubusercontent.com/70530925/137061651-5d072b2d-203a-4136-ae2c-60e795fb45d1.png)
+
+![Screen Shot 2021-10-12 at 11 27 02 PM](https://user-images.githubusercontent.com/70530925/137062307-ea6d984f-99a5-4233-89ef-bd2b0b498243.png)
+
 
 # Resources Used:
 
@@ -43,3 +62,5 @@ https://pkg.go.dev/time
 https://gobyexample.com/channels
 
 https://stackoverflow.com/questions/19208725/example-for-sync-waitgroup-correct
+
+https://www.geeksforgeeks.org/pointers-in-golang/
