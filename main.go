@@ -95,7 +95,7 @@ func runPush(wg *sync.WaitGroup) {
 		}
 		fmt.Printf("\nIt took %d rounds to infect %d nodes.\n", roundCount, nodeCount)
 	}
-	fmt.Printf("On average, over the %d turns, it took %f rounds to infect %d nodes.", turns, totalRounds/(float32)(turns), nodeCount)
+	fmt.Printf("\nOn average, over the %d turns, it took %f rounds to infect %d nodes.\n", turns, totalRounds/(float32)(turns), nodeCount)
 }
 
 // very similar code to pushReceive. see notes from pushReceive to understand.
@@ -165,16 +165,17 @@ func runPull(wg *sync.WaitGroup) {
 			pull(wg)
 			complete, _ := isDone()
 			if complete {
+				totalRounds += (float32)(roundCount)
 				break
 			}
 		}
 		fmt.Printf("\nIt took %d rounds to infect %d nodes.\n", roundCount, nodeCount)
 	}
-	fmt.Printf("On average, over the %d turns, it took %f rounds to infect %d nodes.", turns, totalRounds/(float32)(turns), nodeCount)
+	fmt.Printf("\nOn average, over the %d turns, it took %f rounds to infect %d nodes.\n", turns, totalRounds/(float32)(turns), nodeCount)
 }
 
 
-/*This function describes the push/pull switch type of gossip, in which when less than half of the nodes are infected, 
+/*This function describes the push/pull switch type of gossip, in which when less than half of the nodes are infected,
 	it will push, and after half of the nodes are infected it will pull.
 	This function is why i track infectedCount in isDone.*/
 func pushPull(wg *sync.WaitGroup) {
@@ -212,11 +213,13 @@ func runPushPull(wg *sync.WaitGroup) {
 			pushPull(wg)
 			complete, _ := isDone()
 			if complete {
+				totalRounds += (float32)(roundCount)
 				break
 			}
 		}
 		fmt.Printf("\nIt took %d rounds to infect %d nodes.\n", roundCount, nodeCount)
 	}
+	fmt.Printf("\nOn average, over the %d turns, it took %f rounds to infect %d nodes.\n", turns, totalRounds/(float32)(turns), nodeCount)
 }
 
 //This function checks whether or not all of the nodes are infected yet.
