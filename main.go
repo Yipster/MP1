@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-var totalRounds float32
-var nodeCount int
-var turns int
-var roundCount int
-var nodes []Node
-var gossipType int
+var totalRounds float32 //used to calculate average
+var nodeCount int //the number of nodes, as input by the user.
+var turns int //number of turns, ie iterations to run the simulation
+var roundCount int //number of rounds at the current time
+var nodes []Node //all nodes
+var gossipType int //type of gossip to simulate
 
 
 type Node struct {
@@ -20,7 +20,7 @@ type Node struct {
 	channel  *chan bool
 }
 
-
+//This function finds a random node to infect, if the node is already infected.
 func pushSend(wg *sync.WaitGroup, node *Node) {
 	defer wg.Done()
 
@@ -31,6 +31,7 @@ func pushSend(wg *sync.WaitGroup, node *Node) {
 	}
 }
 
+//If it receives a node receives an infection message, it will be infected
 func pushReceive(wg *sync.WaitGroup, node *Node) {
 	defer wg.Done()
 
@@ -47,12 +48,14 @@ func pushReceive(wg *sync.WaitGroup, node *Node) {
 	}
 }
 
+//runs both pushSend and pushReceive for all nodes.
 func push(wg *sync.WaitGroup) {
 	for i := 0; i < nodeCount; i++ {
 		wg.Add(1)
 		pushSend(wg, &nodes[i])
 	}
-	time.Sleep(50 * time.Millisecond)
+	//nodes go to sleep for 50 miliseconds. This is required or it will cause a deadlock.
+	time.Sleep(50 * time.Millisecond) //I've tried using lower sleep timers, but 50 seems to consistently work. It slows down the process a bit.
 	wg.Wait()
 
 	for j := 0; j < nodeCount; j++ {
@@ -62,24 +65,28 @@ func push(wg *sync.WaitGroup) {
 	wg.Wait()
 }
 
+//This function is called by main and runs a simulation of push gossip as many times as the user input for turns.
 func runPush(wg *sync.WaitGroup) {
 	totalRounds = 0
 	for i:= 1; i<=turns; i++{
 		fmt.Printf("\nTurn number %d!.\n", i)
+		// making a new set of nodes and channels.
 		nodes = make([]Node, nodeCount)
 		channels := make([]chan bool, nodeCount)
 
+		//initializing the channels and nodes.
 		for i := 0; i < nodeCount; i++ {
 			channels[i] = make(chan bool, nodeCount)
 			nodes[i] = Node{false, &(channels[i])}
 		}
 
-		nodes[0].isInfected = true
-		roundCount = 0
+		nodes[0].isInfected = true //set node 0 to infected to start things off.
+		roundCount = 0 //resetting roundcount every turn
 		for true {
 			roundCount++
 			fmt.Printf("\n\nStarting round %d in turn %d!", roundCount, i)
 			push(wg)
+			//checks if infection is complete yet.
 			complete, _ := isDone()
 			if complete {
 				totalRounds += (float32)(roundCount)
@@ -91,7 +98,7 @@ func runPush(wg *sync.WaitGroup) {
 	fmt.Printf("On average, over the %d turns, it took %f rounds to infect %d nodes.", turns, totalRounds/(float32)(turns), nodeCount)
 }
 
-// very similar code to pushReceive
+// very similar code to pushReceive. see notes from pushReceive to understand.
 func pullSend(wg *sync.WaitGroup, node *Node) {
 	defer wg.Done()
 
@@ -112,8 +119,10 @@ func pullSend(wg *sync.WaitGroup, node *Node) {
 	}
 }
 
+//This function fills the channel with gossip if the node is infected.
 func pullReceive(wg *sync.WaitGroup, node *Node) {
 	defer wg.Done()
+
 	if node.isInfected {
 		for len(*(*node).channel) < nodeCount {
 			*(*node).channel <- node.isInfected
@@ -121,7 +130,7 @@ func pullReceive(wg *sync.WaitGroup, node *Node) {
 	}
 }
 
-
+//almost exactly the same as push function. Read comments from above to understand.
 func pull(wg *sync.WaitGroup) {
 	for i := 0; i < nodeCount; i++ {
 		wg.Add(1)
@@ -137,6 +146,7 @@ func pull(wg *sync.WaitGroup) {
 	wg.Wait()
 }
 
+//almost exactly the same as runPush function. Read above to understand.
 func runPull(wg *sync.WaitGroup) {
 	for i:= 1; i<=turns; i++{
 		nodes = make([]Node, nodeCount)
@@ -163,9 +173,14 @@ func runPull(wg *sync.WaitGroup) {
 	fmt.Printf("On average, over the %d turns, it took %f rounds to infect %d nodes.", turns, totalRounds/(float32)(turns), nodeCount)
 }
 
+
+/*This function describes the push/pull switch type of gossip, in which when less than half of the nodes are infected, 
+	it will push, and after half of the nodes are infected it will pull.
+	This function is why i track infectedCount in isDone.*/
 func pushPull(wg *sync.WaitGroup) {
 	complete, infectedCount := isDone()
 	if !complete{
+		//at about halfway point it will swap
 		if infectedCount <= nodeCount/2 {
 			fmt.Print("\nPushing...")
 			push(wg)
@@ -178,6 +193,7 @@ func pushPull(wg *sync.WaitGroup) {
 	}
 }
 
+//This function's code is almost exactly the same as runPush and runPull. See above comments on runPush for explanation.
 func runPushPull(wg *sync.WaitGroup) {
 	for i:= 1; i<=turns; i++{
 		nodes = make([]Node, nodeCount)
@@ -203,13 +219,14 @@ func runPushPull(wg *sync.WaitGroup) {
 	}
 }
 
+//This function checks whether or not all of the nodes are infected yet.
 func isDone() (bool, int) {
 	done := true
-	tempCount := 0
+	tempCount := 0 //tempCount is used to get infectedCount, which is used in pushPull.
 	fmt.Print("\nCurrent state of nodes: ")
 	for i := 0; i < nodeCount; i++ {
 		fmt.Printf("\nNode %d: %t", i, nodes[i].isInfected)
-		if !nodes[i].isInfected {
+		if !nodes[i].isInfected { // if any node is not infected, it will return false.
 			done = false
 		} else {
 			tempCount++
@@ -222,6 +239,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	rand.Seed(time.Now().UnixNano()) //Make sure that the seed is randomized.
 
+	// gets user input, exactly as described.
 	fmt.Println("How many nodes would you like to test? Please only enter numbers!")
 	fmt.Scanf("%d", &nodeCount)
 	fmt.Println("How many times would you like to run the test? Please only enter numbers!")
