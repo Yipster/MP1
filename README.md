@@ -38,7 +38,7 @@ After cloning the repository, simply cd to the file and type "go run main.go". T
 
 When the program starts running, it will ask for three different things. Be sure to only input numbers, or there will be an error.
 
-![Screen Shot 2021-10-12 at 11 09 46 PM](https://user-images.githubusercontent.com/70530925/137061361-00ac5bcb-4562-4b1e-b6d4-b65a0d561912.png)
+![Screen Shot 2021-10-12 at 11 18 19 PM](https://user-images.githubusercontent.com/70530925/137062335-fe67730c-8ddf-4b54-b38b-0fbf90ffac3a.png)
 
 After this input, it will begin the gossip simulation.
 
